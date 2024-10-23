@@ -1,0 +1,27 @@
+name: Cairo_Mines
+description: A Minesweeper game built with Flutter.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: "^1.0.0"
+  firebase_auth: "^1.0.0"
+  cloud_firestore: "^1.0.0"
+  audioplayers: "^0.20.1"
+  # Add other dependencies as needed
+  google_mobile_ads: "^1.0.0"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/fonts/
