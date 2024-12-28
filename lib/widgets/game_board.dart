@@ -1,13 +1,12 @@
-// widgets/game_board.dart
-
 import 'package:flutter/material.dart';
-import '../models/grid.dart';
-import 'cairo_painter.dart';
 import '../models/cell.dart';
 import '../providers/game_provider.dart';
+import 'cairo_painter.dart';
 import 'package:provider/provider.dart';
 
 class GameBoard extends StatelessWidget {
+  const GameBoard({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Consumer<GameProvider>(
@@ -32,7 +31,6 @@ class GameBoard extends StatelessWidget {
     Cell? cell = getCellAtPosition(context, position);
     if (cell != null) {
       Provider.of<GameProvider>(context, listen: false).revealCell(cell);
-      // Handle game over or win
     }
   }
 
@@ -44,24 +42,15 @@ class GameBoard extends StatelessWidget {
   }
 
   Cell? getCellAtPosition(BuildContext context, Offset position) {
-    Grid grid = Provider.of<GameProvider>(context, listen: false).grid;
-    for (Cell cell in grid.cells.values) {
-      Path pentagon = cell.pentagonPath ?? createPentagonPath(cell);
-      if (pentagon.contains(position)) {
+    final gameProvider = Provider.of<GameProvider>(context, listen: false);
+    final grid = gameProvider.grid;
+
+    for (var cell in grid.cells.values) {
+      // pentagonPath is guaranteed to be set in generateCells
+      if (cell.pentagonPath!.contains(position)) {
         return cell;
       }
     }
     return null;
-  }
-
-  Path createPentagonPath(Cell cell) {
-    Path path = Path();
-    path.moveTo(cell.vertices[0].dx, cell.vertices[0].dy);
-    for (int i = 1; i < cell.vertices.length; i++) {
-      path.lineTo(cell.vertices[i].dx, cell.vertices[i].dy);
-    }
-    path.close();
-    cell.pentagonPath = path; // Cache the path
-    return path;
   }
 }

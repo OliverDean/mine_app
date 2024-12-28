@@ -1,38 +1,66 @@
-// screens/game_screen.dart
-
 import 'package:flutter/material.dart';
-import '../widgets/game_board.dart';
-import '../providers/game_provider.dart';
 import 'package:provider/provider.dart';
+import '../providers/game_provider.dart';
+import '../models/grid.dart';
+import '../widgets/game_board.dart';
 
 class GameScreen extends StatelessWidget {
+  const GameScreen({Key? key}) : super(key: key);
+
+  static const int defaultRows = 10;
+  static const int defaultCols = 10;
+  static const int defaultMines = 20;
+
   @override
   Widget build(BuildContext context) {
-    final gameProvider = Provider.of<GameProvider>(context);
+    // Calculate cellSize here and pass it into the provider
+    double screenWidth = MediaQuery.of(context).size.width;
+    double cellSize = screenWidth / (defaultCols * 1.5);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Cairo Minesweeper'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () {
-              gameProvider.resetGame(10, 10, 20);
-            },
-          ),
-        ],
+    return ChangeNotifierProvider(
+      create: (_) => GameProvider(
+        rows: defaultRows,
+        cols: defaultCols,
+        mineCount: defaultMines,
+        cellSize: cellSize,
       ),
-      body: Stack(
-        children: [
-          GameBoard(),
-          Positioned(
-            top: 10,
-            left: 10,
-            child: buildStatusPanel(context),
-          ),
-          if (gameProvider.grid.gameOver) buildGameOverDialog(context),
-          if (gameProvider.grid.gameWon) buildGameWonDialog(context),
-        ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Cairo Minesweeper'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                Provider.of<GameProvider>(context, listen: false).resetGame(
+                  defaultRows,
+                  defaultCols,
+                  defaultMines,
+                  cellSize,
+                );
+              },
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            const GameBoard(),
+            Positioned(
+              top: 10,
+              left: 10,
+              child: buildStatusPanel(context),
+            ),
+            Consumer<GameProvider>(
+              builder: (context, gameProvider, child) {
+                if (gameProvider.status == GameStatus.lost) {
+                  return buildGameOverDialog(context);
+                } else if (gameProvider.status == GameStatus.won) {
+                  return buildGameWonDialog(context);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -40,19 +68,19 @@ class GameScreen extends StatelessWidget {
   Widget buildStatusPanel(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
     return Container(
-      padding: EdgeInsets.all(8),
-      color: Colors.black.withOpacity(0.5),
+      padding: const EdgeInsets.all(8),
+      color: Colors.black.withValues(),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'Mines: ${gameProvider.remainingMines}',
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: const TextStyle(color: Colors.white, fontSize: 18),
           ),
-          SizedBox(width: 20),
+          const SizedBox(width: 20),
           Text(
             'Flags: ${gameProvider.flagsPlaced}',
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: const TextStyle(color: Colors.white, fontSize: 18),
           ),
         ],
       ),
@@ -62,15 +90,17 @@ class GameScreen extends StatelessWidget {
   Widget buildGameOverDialog(BuildContext context) {
     return Center(
       child: AlertDialog(
-        title: Text('Game Over'),
-        content: Text('You hit a mine!'),
+        title: const Text('Game Over'),
+        content: const Text('You hit a mine!'),
         actions: [
           TextButton(
             onPressed: () {
-              Provider.of<GameProvider>(context, listen: false)
-                  .resetGame(10, 10, 20);
+              final gameProvider = Provider.of<GameProvider>(context, listen: false);
+              double screenWidth = MediaQuery.of(context).size.width;
+              double cellSize = screenWidth / (10 * 1.5);
+              gameProvider.resetGame(10, 10, 20, cellSize);
             },
-            child: Text('Restart'),
+            child: const Text('Restart'),
           ),
         ],
       ),
@@ -80,15 +110,17 @@ class GameScreen extends StatelessWidget {
   Widget buildGameWonDialog(BuildContext context) {
     return Center(
       child: AlertDialog(
-        title: Text('Congratulations!'),
-        content: Text('You won the game!'),
+        title: const Text('Congratulations!'),
+        content: const Text('You won the game!'),
         actions: [
           TextButton(
             onPressed: () {
-              Provider.of<GameProvider>(context, listen: false)
-                  .resetGame(10, 10, 20);
+              final gameProvider = Provider.of<GameProvider>(context, listen: false);
+              double screenWidth = MediaQuery.of(context).size.width;
+              double cellSize = screenWidth / (10 * 1.5);
+              gameProvider.resetGame(10, 10, 20, cellSize);
             },
-            child: Text('Play Again'),
+            child: const Text('Play Again'),
           ),
         ],
       ),

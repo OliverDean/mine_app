@@ -1,5 +1,3 @@
-// models/cell.dart
-
 import 'dart:ui';
 
 class Cell {
@@ -11,7 +9,7 @@ class Cell {
   bool isFlagged;
   int adjacentMines;
   late List<Offset> vertices; // For rendering the pentagon
-  List<Cell> neighbors = []; // Neighboring cells
+  final List<Cell> neighbors = []; // Neighboring cells
   Path? pentagonPath; // Cached path for rendering and hit-testing
 
   Cell({
@@ -22,4 +20,9 @@ class Cell {
     this.isFlagged = false,
     this.adjacentMines = 0,
   });
+
+  @override
+  String toString() {
+    return 'Cell(q: $q, r: $r, isMine: $isMine, isRevealed: $isRevealed, isFlagged: $isFlagged, adjacentMines: $adjacentMines)';
+  }
 }

@@ -9,7 +9,7 @@ void main() {
     int cols = 10;
     int mineCount = 20;
 
-    Grid grid = Grid(rows: rows, cols: cols, mineCount: mineCount);
+    Grid grid = Grid(rows: rows, cols: cols, mineCount: mineCount, cellSize: 20.0);
 
     // Check that the correct number of cells are created
     expect(grid.cells.length, rows * cols);

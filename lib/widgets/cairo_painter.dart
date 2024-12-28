@@ -1,5 +1,3 @@
-// widgets/cairo_painter.dart
-
 import 'package:flutter/material.dart';
 import '../models/grid.dart';
 import '../models/cell.dart';
@@ -11,59 +9,42 @@ class CairoPainter extends CustomPainter {
   CairoPainter({required this.grid, this.animation})
       : super(repaint: animation);
 
+  static const revealedMineColor = Colors.red;
+  static const revealedSafeColor = Colors.grey;
+  static const unrevealedColor = Colors.blue;
+  static const flaggedColor = Colors.orange;
+  static const textColor = Colors.black;
+
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint();
 
-    grid.cells.forEach((key, cell) {
+    for (var cell in grid.cells.values) {
       paint.color = getCellColor(cell);
-
-      // Use cached pentagon path or create one
-      Path pentagon = cell.pentagonPath ?? createPentagonPath(cell);
+      Path pentagon = cell.pentagonPath!;
       canvas.drawPath(pentagon, paint);
 
       if (cell.isRevealed && cell.adjacentMines > 0 && !cell.isMine) {
-        // Draw adjacent mine count
-        drawText(
-          canvas,
-          cell.center,
-          cell.adjacentMines.toString(),
-        );
+        drawText(canvas, cell.center, cell.adjacentMines.toString());
       }
 
-      if (cell.isFlagged) {
-        // Draw flag icon or marker
+      if (cell.isFlagged && !cell.isRevealed) {
         drawFlag(canvas, cell.center);
       }
-    });
+    }
   }
 
   Color getCellColor(Cell cell) {
     if (cell.isRevealed) {
-      if (cell.isMine) {
-        return Colors.red;
-      } else {
-        return Colors.grey.shade300;
-      }
+      return cell.isMine ? revealedMineColor : revealedSafeColor.shade300;
     } else {
-      return cell.isFlagged ? Colors.orange : Colors.blue;
+      return cell.isFlagged ? flaggedColor : unrevealedColor;
     }
-  }
-
-  Path createPentagonPath(Cell cell) {
-    Path path = Path();
-    path.moveTo(cell.vertices[0].dx, cell.vertices[0].dy);
-    for (int i = 1; i < cell.vertices.length; i++) {
-      path.lineTo(cell.vertices[i].dx, cell.vertices[i].dy);
-    }
-    path.close();
-    cell.pentagonPath = path; // Cache the path
-    return path;
   }
 
   void drawText(Canvas canvas, Offset position, String text) {
     TextSpan span = TextSpan(
-      style: TextStyle(color: Colors.black, fontSize: 14.0),
+      style: const TextStyle(color: textColor, fontSize: 14.0),
       text: text,
     );
     TextPainter tp = TextPainter(
